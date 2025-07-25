@@ -65,10 +65,11 @@ func GetSessionToken(client tls_client.HttpClient, api_key string, proxy string)
 	authorization := generateRefreshToken(api_key)
 	header := baseHeader()
 	header.Set("authorization", "Basic "+authorization)
-	header.Set("x-sdk-client", "eyJldmVudF9pZCI6ImV2ZW50LWlkLWQ4M2IwNTI4LTllNjMtNDkxYi05OGM5LWUyZmJmODY4MWRlZiIsImFwcF9zZXNzaW9uX2lkIjoiYXBwLXNlc3Npb24taWQtNjRlNGI4ZTItOWM2NS00MDFlLWIyMjUtYjk4MWYxNGRjMTRjIiwicGVyc2lzdGVudF9pZCI6InBlcnNpc3RlbnQtaWQtOTNlZWYwNWUtYWE0OS00OWJhLThhNjktYWVjZTA3ZTZiM2NmIiwiY2xpZW50X3NlbnRfYXQiOiIyMDI0LTA0LTI2VDExOjM4OjU1Ljk0NVoiLCJ0aW1lem9uZSI6IkFzaWEvU2hhbmdoYWkiLCJzdHl0Y2hfdXNlcl9pZCI6InVzZXItbGl2ZS1kZDM4ODRiYS01M2YyLTRjNjEtYTI5Yi02NzEwNmExMDMxNTciLCJzdHl0Y2hfc2Vzc2lvbl9pZCI6InNlc3Npb24tbGl2ZS01ZjQ5NDViZS1kNTIyLTQyZWEtYTEzNC01MWE4YzM2OTBkN2UiLCJhcHAiOnsiaWRlbnRpZmllciI6ImNvbnNvbGUuZ3JvcS5jb20ifSwic2RrIjp7ImlkZW50aWZpZXIiOiJTdHl0Y2guanMgSmF2YXNjcmlwdCBTREsiLCJ2ZXJzaW9uIjoiNC42LjAifX0=")
-	header.Set("x-sdk-parent-host", "https://groq.com")
+	header.Set("x-sdk-client", "eyJldmVudF9pZCI6ImV2ZW50LWlkLTRiOGY2ZjllLWZiMzktNGQwMi04ZTdkLTQ0ZmZkODQxMGQ4NiIsImFwcF9zZXNzaW9uX2lkIjoiYXBwLXNlc3Npb24taWQtZmQ3ZmMzMzgtOGEwOC00Mzc5LWI3ODMtNjFjYjczOTIyNDM3IiwicGVyc2lzdGVudF9pZCI6InBlcnNpc3RlbnQtaWQtYThjOTkxOTQtOTcwNi00Nzk2LTg0ZGUtZDM5MTIyMzFlNTA3IiwiY2xpZW50X3NlbnRfYXQiOiIyMDI1LTA3LTI1VDA3OjAwOjQzLjkyOFoiLCJ0aW1lem9uZSI6IkFzaWEvU2hhbmdoYWkiLCJzdHl0Y2hfdXNlcl9pZCI6InVzZXItbGl2ZS01NTc2MTIyYi00OTdhLTQ0ZmEtYTY1Zi01NTAzYmI3OTgzODUiLCJzdHl0Y2hfc2Vzc2lvbl9pZCI6InNlc3Npb24tbGl2ZS00ZmRiMWViYi1iNTg5LTRiMzctODkxMy0zM2E4ZTczNTAzMGMiLCJhcHAiOnsiaWRlbnRpZmllciI6ImNvbnNvbGUuZ3JvcS5jb20ifSwic2RrIjp7ImlkZW50aWZpZXIiOiJTdHl0Y2guanMgSmF2YXNjcmlwdCBTREsiLCJ2ZXJzaW9uIjoiNS4yNC42In19")
+	header.Set("x-sdk-parent-host", "https://console.groq.com")
+	header.Set("sec-fetch-site", "cross-site")
 
-	rawUrl := "https://web.stytch.com/sdk/v1/sessions/authenticate"
+	rawUrl := "https://api.stytch.com/sdk/v1/sessions/authenticate"
 	req, err := http.NewRequest(http.MethodPost, rawUrl, strings.NewReader(`{}`))
 	req.Header = header
 	if err != nil {
