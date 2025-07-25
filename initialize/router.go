@@ -1,9 +1,10 @@
 package initialize
 
 import (
-	"github.com/gin-gonic/gin"
 	"groqai2api/middlewares"
 	"groqai2api/router"
+
+	"github.com/gin-gonic/gin"
 )
 
 func InitRouter() *gin.Engine {

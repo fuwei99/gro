@@ -13,6 +13,7 @@ func InitProxy() {
 	var proxies []string
 	proxyUrl := os.Getenv("PROXY_URL")
 	if proxyUrl != "" {
+		slog.Info("Found proxy from PROXY_URL", "url", proxyUrl)
 		proxies = append(proxies, proxyUrl)
 	}
 
@@ -40,6 +41,11 @@ func InitProxy() {
 		if proxy != "" {
 			proxies = append(proxies, proxy)
 		}
+	}
+	if len(proxies) > 0 {
+		slog.Info("Proxies loaded", "count", len(proxies))
+	} else {
+		slog.Warn("No proxies configured")
 	}
 	global.ProxyPool = proxypool.NewIProxyIP(proxies)
 }

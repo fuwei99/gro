@@ -5,10 +5,11 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"strings"
+
 	http "github.com/bogdanfinn/fhttp"
 	tls_client "github.com/bogdanfinn/tls-client"
 	groq "github.com/learnLi/groq_client"
-	"strings"
 )
 
 func baseHeader() http.Header {
@@ -16,15 +17,15 @@ func baseHeader() http.Header {
 	header.Set("accept", "*/*")
 	header.Set("accept-language", "zh-CN,zh;q=0.9")
 	header.Set("content-type", "application/json")
-	header.Set("origin", "https://groq.com")
-	header.Set("referer", "https://groq.com/")
-	header.Set("sec-ch-ua", `"Google Chrome";v="123", "Not:A-Brand";v="8", "Chromium";v="123"`)
+	header.Set("origin", "https://console.groq.com")
+	header.Set("referer", "https://console.groq.com/")
+	header.Set("sec-ch-ua", `"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"`)
 	header.Set("sec-ch-ua-mobile", "?0")
 	header.Set("sec-ch-ua-platform", `"Windows"`)
 	header.Set("sec-fetch-dest", "empty")
 	header.Set("sec-fetch-mode", "cors")
-	header.Set("sec-fetch-site", "cross-site")
-	header.Set("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36")
+	header.Set("sec-fetch-site", "same-site")
+	header.Set("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36")
 	return header
 }
 func GerOrganizationId(client tls_client.HttpClient, api_key string, proxy string) (string, error) {
@@ -99,7 +100,6 @@ func ChatCompletions(client tls_client.HttpClient, api_request groq.APIRequest, 
 	body_json, _ := json.Marshal(api_request)
 	header := baseHeader()
 	header.Set("authorization", "Bearer "+api_key)
-	header.Set("groq-app", "chat")
 	header.Set("groq-organization", organization)
 	//response, err := client.Request("POST", "https://api.groq.com/openai/v1/chat/completions", header, nil, bytes.NewBuffer(body_json))
 	req, err := http.NewRequest(http.MethodPost, "https://api.groq.com/openai/v1/chat/completions", bytes.NewBuffer(body_json))
@@ -120,7 +120,6 @@ func ChatCompletions(client tls_client.HttpClient, api_request groq.APIRequest, 
 func GetModels(client tls_client.HttpClient, api_key string, organization string, proxy string) (*http.Response, error) {
 	header := baseHeader()
 	header.Set("authorization", "Bearer "+api_key)
-	header.Set("groq-app", "chat")
 	header.Set("groq-organization", organization)
 	if proxy != "" {
 		client.SetProxy(proxy)
