@@ -1,9 +1,10 @@
 package groq
 
 import (
+	"io"
+
 	http "github.com/bogdanfinn/fhttp"
 	"github.com/gin-gonic/gin"
-	"io"
 )
 
 type ReadWriter struct {

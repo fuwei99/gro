@@ -15,7 +15,7 @@ import (
 )
 
 func authRefreshHandler(client tls_client.HttpClient, account *groq.Account, api_key string, proxy string) error {
-	token, err := groqHttp.GetSessionToken(client, api_key, "")
+	token, err := groqHttp.GetSessionToken(client, api_key, proxy)
 	if err != nil {
 		slog.Error("Failed to get session token", "err", err)
 		return err
