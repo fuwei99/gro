@@ -22,5 +22,5 @@ func InitConfig() {
 	}
 
 	global.ChinaPrompt = os.Getenv("CHINA_PROMPT")
-	global.Authorization = os.Getenv("Authorization")
+	global.Password = os.Getenv("PASSWORD")
 }

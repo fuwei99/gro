@@ -6,7 +6,6 @@ import (
 	groqHttp "groqai2api/pkg/groq"
 	"log/slog"
 	"net/http"
-	"strings"
 	"time"
 
 	tls_client "github.com/bogdanfinn/tls-client"
@@ -14,17 +13,6 @@ import (
 	"github.com/gin-gonic/gin"
 	groq "github.com/learnLi/groq_client"
 )
-
-func authSessionHandler(client tls_client.HttpClient, account *groq.Account, api_key string, proxy string) error {
-	organization, err := groqHttp.GerOrganizationId(client, api_key, proxy)
-	if err != nil {
-		slog.Error("Failed to get organization id", "err", err)
-		return err
-	}
-	account.Organization = organization
-	global.Cache.Set(organization, api_key, 3*time.Minute)
-	return nil
-}
 
 func authRefreshHandler(client tls_client.HttpClient, account *groq.Account, api_key string, proxy string) error {
 	token, err := groqHttp.GetSessionToken(client, api_key, "")
@@ -48,6 +36,8 @@ func chat(c *gin.Context) {
 		c.JSON(500, gin.H{
 			"error": err.Error(),
 		})
+		c.Abort()
+		return
 	}
 	client := groqHttp.NewBasicClient()
 	proxyUrl := global.ProxyPool.GetProxyIP()
@@ -55,33 +45,11 @@ func chat(c *gin.Context) {
 		client.SetProxy(proxyUrl)
 	}
 
-	authorization := c.Request.Header.Get("Authorization")
 	account := global.AccountPool.Get()
-	if authorization != "" {
-		customToken := strings.Replace(authorization, "Bearer ", "", 1)
-		if customToken != "" {
-			// 说明传递的是session_token
-			if strings.HasPrefix(customToken, "eyJhbGciOiJSUzI1NiI") {
-				account = groq.NewAccount("", "")
-				err := authSessionHandler(client, account, customToken, "")
-				if err != nil {
-					slog.Error("session_token is invalid", err)
-					c.JSON(400, gin.H{"error": err.Error()})
-					c.Abort()
-					return
-				}
-			}
-			if len(customToken) == 44 {
-				account = groq.NewAccount(customToken, "")
-				err := authRefreshHandler(client, account, customToken, "")
-				if err != nil {
-					slog.Error("customToken is invalid", err)
-					c.JSON(400, gin.H{"error": err.Error()})
-					c.Abort()
-					return
-				}
-			}
-		}
+	if account == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "No available accounts in pool"})
+		c.Abort()
+		return
 	}
 
 	// 默认插入中文prompt
@@ -120,31 +88,11 @@ func models(c *gin.Context) {
 	if proxyUrl != "" {
 		client.SetProxy(proxyUrl)
 	}
-	authorization := c.Request.Header.Get("Authorization")
 	account := global.AccountPool.Get()
-	if authorization != "" {
-		customToken := strings.Replace(authorization, "Bearer ", "", 1)
-		if customToken != "" {
-			// 说明传递的是session_token
-			if strings.HasPrefix(customToken, "eyJhbGciOiJSUzI1NiI") {
-				account = groq.NewAccount("", "")
-				err := authSessionHandler(client, account, customToken, "")
-				if err != nil {
-					c.JSON(400, gin.H{"error": err.Error()})
-					c.Abort()
-					return
-				}
-			}
-			if len(customToken) == 44 {
-				account = groq.NewAccount(customToken, "")
-				err := authRefreshHandler(client, account, customToken, "")
-				if err != nil {
-					c.JSON(400, gin.H{"error": err.Error()})
-					c.Abort()
-					return
-				}
-			}
-		}
+	if account == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "No available accounts in pool"})
+		c.Abort()
+		return
 	}
 
 	if _, ok := global.Cache.Get(account.Organization); !ok {
