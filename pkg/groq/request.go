@@ -5,6 +5,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"io"
+	"log/slog"
 	"strings"
 
 	http "github.com/bogdanfinn/fhttp"
@@ -33,6 +35,26 @@ func GerOrganizationId(client tls_client.HttpClient, api_key string, proxy strin
 
 	if proxy != "" {
 		client.SetProxy(proxy)
+		// ---- IP Check Start ----
+		slog.Info("Checking IP address via proxy", "proxy", proxy)
+		ipCheckReq, err := http.NewRequest(http.MethodGet, "https://ipinfo.io/json", nil)
+		if err != nil {
+			slog.Error("Failed to create IP check request", "err", err)
+		} else {
+			ipCheckResp, err := client.Do(ipCheckReq)
+			if err != nil {
+				slog.Error("Failed to perform IP check request", "err", err)
+			} else {
+				defer ipCheckResp.Body.Close()
+				body, err := io.ReadAll(ipCheckResp.Body)
+				if err != nil {
+					slog.Error("Failed to read IP check response body", "err", err)
+				} else {
+					slog.Info("IP Check Response", "status", ipCheckResp.StatusCode, "body", string(body))
+				}
+			}
+		}
+		// ---- IP Check End ----
 	}
 	req, err := http.NewRequest(http.MethodGet, "https://api.groq.com/platform/v1/user/profile", nil)
 	header.Set("authorization", "Bearer "+api_key)
