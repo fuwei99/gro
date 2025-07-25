@@ -61,17 +61,18 @@ func chat(c *gin.Context) {
 		api_req.Messages = append([]groq.APIMessage{prompt}, api_req.Messages...)
 	}
 	if _, ok := global.Cache.Get(account.Organization); !ok {
-		err := authRefreshHandler(client, account, account.SessionToken, "")
+		err := authRefreshHandler(client, account, account.SessionToken, proxyUrl)
 		if err != nil {
-			slog.Error("get refresh err", err)
+			slog.Error("get refresh err", "err", err.Error())
 			c.JSON(400, gin.H{"error": err.Error()})
 			c.Abort()
 			return
 		}
 	}
 	api_key, _ := global.Cache.Get(account.Organization)
-	response, err := groqHttp.ChatCompletions(client, api_req, api_key.(string), account.Organization, "")
+	response, err := groqHttp.ChatCompletions(client, api_req, api_key.(string), account.Organization, proxyUrl)
 	if err != nil {
+		slog.Error("Failed to get chat completions", "err", err.Error(), "api_key", api_key, "organization", account.Organization)
 		c.JSON(500, gin.H{
 			"error": err.Error(),
 		})
@@ -96,7 +97,7 @@ func models(c *gin.Context) {
 	}
 
 	if _, ok := global.Cache.Get(account.Organization); !ok {
-		err := authRefreshHandler(client, account, account.SessionToken, "")
+		err := authRefreshHandler(client, account, account.SessionToken, proxyUrl)
 		if err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
 			c.Abort()
@@ -104,7 +105,7 @@ func models(c *gin.Context) {
 		}
 	}
 	api_key, _ := global.Cache.Get(account.Organization)
-	response, err := groqHttp.GetModels(client, api_key.(string), account.Organization, "")
+	response, err := groqHttp.GetModels(client, api_key.(string), account.Organization, proxyUrl)
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		c.Abort()
